@@ -1,0 +1,1287 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+<style>
+@import url(https://fonts.googleapis.com/css?family=Fredericka+the+Great);
+ body {
+    padding:1em;
+    background:#475;
+}
+
+.selected {
+  border-color: black;
+  border: 5px;
+  background-color: #00ff00
+}
+
+.selected2 {
+  border-color: black;
+  border: 5px;
+  background-color: #00ccff
+}
+
+
+.content {
+    font-size:150%;
+}
+.thCard {
+    display:inline-block;
+    position:relative;
+    width:4em;
+    height:6em;
+    border-radius:.25em;
+    text-align:center;
+    line-height:1em;
+    overflow:hidden;
+    background:#EEE;
+    user-select: none;
+    margin-right: 5px;
+    margin-top: 5px;
+}
+.thCard[data-suit="♦"], .thCard[data-suit="♥"] {
+    background-color:#cc0000;
+}
+
+.thCard[data-suit="♠"], .thCard[data-suit="♣"] {
+    background-color:#003366;
+}
+
+.thCard:first-letter {
+    padding-left:10em;
+}
+.thCard:before, .thCard:after {
+    display:block;
+    position:absolute;
+}
+
+/* Suit */
+.thCard:before {
+    content:attr(data-suit);
+    width:1em;
+    margin-left:-13%;
+    font-size:500%;
+    text-align:center;
+    color:#FFF;
+    text-shadow:0 0 .1em rgba(0, 0, 0, 0.2);
+}
+.thCard[data-suit="♦"]:before, .thCard[data-suit="♥"]:before {
+    text-shadow:0 0 .1em rgba(255, 0, 0, 0.2);
+}
+.thCard[data-suit="♠"]:before {
+    top:33%;
+}
+.thCard[data-suit="♥"]:before {
+    top:35%;
+}
+.thCard[data-suit="♦"]:before {
+    top:35%;
+}
+.thCard[data-suit="♣"]:before {
+    top:35%;
+}
+
+/* Rank */
+.thCard:after {
+    content:attr(data-rank);
+    width:200%;
+    top:35%;
+    left:-50%;
+    font-size:175%;
+}
+.thCard[data-rank="1"]:after {
+    content:"A";
+}
+.thCard[data-rank="11"]:after {
+    content:"J";
+}
+.thCard[data-rank="12"]:after {
+    content:"Q";
+}
+.thCard[data-rank="13"]:after {
+    content:"K";
+}
+/* Joker */
+.thCard[data-suit="J"]:before {
+    content:'§';
+    top:33%;
+    left:-22%;
+}
+.thCard[data-suit="J"]:after {
+    content:'Joker';
+    font-size:100%;
+    transform:rotate(90deg);
+}
+.thCard[data-suit="J"][data-rank="1"]:after {
+    content:'';
+}
+
+/* back print */
+.thCard.turn {
+    background:#E42;
+    background-size:.2em .3em;
+    background-image:linear-gradient(55deg, rgba(0, 0, 0, 0.3) 26%, rgba(0, 0, 0, 0) 26%, rgba(0, 0, 0, 0.0) 74%, rgba(0, 0, 0, 0.3) 74%), linear-gradient(-55deg, rgba(0, 0, 0, 0.3) 26%, rgba(0, 0, 0, 0) 26%, rgba(0, 0, 0, 0.0) 74%, rgba(0, 0, 0, 0.3) 74%);
+    box-shadow:inset 0 0 0 .15em #FFF;
+}
+.thCard.turn:before, .thCard.turn:after {
+    visibility:hidden;
+}
+
+/* animation */
+.thCard {
+  transition:all .5s;
+}
+
+
+form {
+  width: 300px;
+  margin: 0 auto;
+  text-align: center;
+  padding-top: 50px;
+}
+
+.value-button {
+  display: inline-block;
+  border: 1px solid #ddd;
+  margin: 0px;
+  width: 40px;
+  height: 20px;
+  text-align: center;
+  vertical-align: middle;
+  padding: 11px 0;
+  background: #eee;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.value-button:hover {
+  cursor: pointer;
+}
+
+form #decrease {
+  height: 50px;
+  margin-top: -9px;
+  margin-right: -4px;
+  border-radius: 8px 0 0 8px;
+}
+
+form #increase {
+  height: 50px;
+  margin-left: -4px;
+  margin-top: -9px;
+  border-radius: 0 8px 8px 0;
+}
+
+form #input-wrap {
+  margin: 0px;
+  padding: 0px;
+}
+
+input#number {
+  text-align: center;
+  border: none;
+  border-top: 0px solid #ddd;
+  border-bottom: 0px solid #ddd;
+  margin: 0px;
+  width: 75px;
+  height: 50px;
+  font-size: 20px;
+}
+
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+</style>
+</head>
+
+
+<body>
+
+<div style="float:right">
+    <div style="position: absolute; border:2px solid; border-color: white; border-radius:10px; margin:10px; margin-left:-275px; width: fit-content; padding:5px">	
+  	<h3 class="d-flex justify-content-center" style="color:white; " id="countGame">Game: 1</h3>
+  </div>
+</div>
+
+<div style="float:right">
+    <div style="position: absolute; border:2px solid blue; border-color: #f54266; border-radius:10px; margin-top:80px; margin-left:-275px; width: fit-content; padding:5px">	
+  	<h5 class="d-flex justify-content-center" style="color:#f54266; " id="disadvantage">Bất lợi: <br> Không có </h5>
+  </div>
+</div>
+
+
+  <div class="d-block justify-content-right" style="margin:10px 10px; position: absolute;margin-left:125px">	
+	<button type="button" class="btn btn-outline-light btn-lg" data-toggle="modal" data-target="#exampleModal" id = "historyButton" style="border:2px solid"><strong>View History</strong></button>
+  </div>
+  
+
+  <div class="d-block justify-content-right" style="margin:80px 10px; position: absolute;margin-left:125px">	
+	<button type="button" class="btn btn-outline-light btn-lg" data-toggle="modal" data-target="#helpModal" id = "historyButton">Hướng dẫn</button>
+  </div>
+  
+  
+<div class="content">
+  <div class="d-flex justify-content-center">
+  	<span class="thCard turn" id="card1" data-suit="♠" data-rank="1"></span>
+    <span class="thCard turn" id="card2" data-suit="♦" data-rank="2"></span>
+    <span class="thCard turn" id="card3" data-suit="♦" data-rank="1"></span>
+  </div>
+  
+  <div class="d-flex justify-content-center" style="border:2px solid blue; border-color: white; border-radius:20px; margin:10px 10px">	
+  	<h3 class="d-flex justify-content-center" style="color:white" id="result">Choose Bet amount then click "Play"</h3>
+  </div>
+ 
+  
+    <button id="buff" type="button" class="btn btn-success btn-lg" data-toggle="modal" data-target="#buffModal" style ="position: absolute;margin-top:20px; background-color:#262626;color:#00ffff;border-color:#00ffff;border:3px solid;margin-left:125px" disabled>Trợ giúp</button>
+    
+    <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#upgradeModal" style ="position: absolute; margin-top: 90px; background-color:#262626;color:#00ff00;border-color:#00ff00;border:3px solid;margin-left:125px" onclick="preupgrade()">Nâng cấp</button>
+  
+  <div class="d-flex justify-content-center">
+  	<span class="thCard turn" id="card4" data-suit="♥" data-rank="1"></span>
+  	<span class="thCard turn" id="card5" data-suit="♣" data-rank="1"></span>
+    <span class="thCard turn" id="card6" data-suit="♣" data-rank="1"></span>
+   </div>
+  
+</div>
+
+
+<div class="d-flex justify-content-center">
+    <div style="border:3px solid blue; border-color: #ffff66; border-radius:20px; margin:10px; width: fit-content; padding:5px;background-color:black;color:#cc66ff">	
+  	<h3 class="d-flex justify-content-center" style="color:#ffff66; " id="yourMoney">2000$</h3>
+  </div>
+</div>
+
+
+
+
+<div class="d-flex justify-content-center">
+  	<form style="margin-top:-40px">
+      <div class="value-button" id="decrease" onclick="decreaseValue()" value="Decrease 			Value">-</div>
+      <input style="width:100px" type="number" id="number" value="0" oninput="onInput()" />
+      <div class="value-button" id="increase" onclick="increaseValue()" value="Increase 			Value">+</div>
+      
+     <div class="btn-group" role="group" aria-label="Basic example"> 
+      <button type="button" class="btn btn-primary btn-lg" style="width: 90px; height: 70px; border-radius: 15px; font-size: 26px; text-align: center; margin-top:10px; background-color:#262626;color:#ff33cc;border-color:#ff33cc;border:4px solid;" id="playButton" onclick="play()" value="play">Play</button>
+     
+      <button type="button" class="btn btn-warning btn-lg" style="width: 90px; height: 70px; border-radius: 15px; font-size: 26px; text-align: center; margin-top:10px; margin-left:5px; background-color:#262626;color:#ff6600;border-color:#ff6600;border:4px solid;" id="showButton" disabled = true onclick="show()">Go</button>
+     
+      </div>     
+  	</form>
+ </div>
+   
+ <div style="border:2px solid; border-color: white; border-radius:10px; margin:5px 5px; padding: 0 10px 10px 10px; background-color:#3d3d5c">
+   <h5 id = "lv" style = "position: relative; color: white" >LV: 1 <small>(Win 5 game to Level Up)</small></h5>
+   <div class="progress">
+    <div class="progress-bar bg-success" id = "lvbar" role="progressbar" style="width:0%"     aria-valuenow="10" aria-valuemin="0" aria-valuemax="100">	</div>
+   </div>
+  </div>
+
+<br>
+
+
+   <!-- Modal -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Lịch sử đấu</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body" id="modalContent">
+            ...
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="button" id="clearHis" class="btn btn-primary" data-dismiss="modal">Clear History</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+   <!-- Modal -->
+    <div class="modal fade" id="congraModal" tabindex="-1" role="dialog" aria-labelledby="congraModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="congraModalLabel">WoW ^^</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body" id="modalContent">
+            <h3 class="d-flex justify-content-center" style="color:green">--CONGRATULATION--</h3>
+              <h4 class="d-flex justify-content-center">You have passed 1 million dollars !!!</h4>
+              <h4 id = "total" class="d-flex justify-content-center">...</h4>
+               <h3 class="d-flex justify-content-center" style="color:green">--THANKS FOR PLAYING--</h3>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+   <!-- Modal -->
+    <div class="modal fade" id="helpModal" tabindex="-1" role="dialog" aria-labelledby="congraModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="helpModalLabel" style="color:green">Hướng dẫn</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body" id="modalContent">
+            
+            <p><strong>Chào mừng bạn đến với bài 3 lá (còn gọi bài cào).</strong></p>
+            <h6><strong>Luật chơi:</strong> Mỗi bên sẽ có 3 lá bài, số điểm được tính bằng hàng đơn vị của tổng 3 lá bài (mỗi là bài tây sẽ tính là 10), ví dụ ba lá J-5-3 có tổng là 18 thì số điểm sẽ là 8. Bên thắng sẽ là bên có điểm lớn hơn. Thang điểm từ 0-9, lớn nhất là 3 tây.</h6>
+            <p><strong>Phiên bản này có 1 số biến tấu để mỗi ván bài thêm thú vị.</strong></p>
+            <h6><strong>Cách chơi:</strong> 
+            <ul>
+              <li>Chọn số tiền đặt cược cho mỗi ván (tối đa 5000$)</li>
+              <li>Ấn nút "Play" để chia bài, bạn có thể sử dụng "Trợ giúp" để tăng khả năng chiến thắng</li>
+              <li>Ấn "Go" để 2 bên cùng lật bài và xem kết quả cuối cùng, nếu thắng bạn sẽ được số tiền đặc cược nếu thua sẽ mất số tiền đó</li>		
+              <li>Mỗi ván thắng sẽ giúp bạn lên cấp và rút thăm may mắn (cấp cao nhất là 10)</li>
+              <li>Phần "Nâng cấp" sẽ giúp bạn mở khóa những kĩ năng "bá đạo"</li>
+              <li>Mỗi ván sẽ có nhưng bất lợi ngẫu nhiêu cho bạn khi thua, chú ý nhé !</li>
+            </ul>
+            </h6>
+            <h6>Hết phần hướng dẫn, chúc bạn may mắn</h6>
+            <h4 class="d-flex justify-content-center">BẠN CẦN BAO NHIÊU VÁN BÀI ĐỂ CÓ </h4> 
+            <h4 class="d-flex justify-content-center">1 TRIỆU ĐÔ ?</h4>
+            <h4 class="d-flex justify-content-center" style="color:green"> Thử vận may ngay thôi !!! </h4>
+            
+            
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+ 
+
+
+    <!-- Modal2 -->
+    <div class="modal fade" id="buffModal" tabindex="-1" role="dialog" aria-labelledby="buffModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Chọn trợ giúp</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body" id="modalContent">
+            
+            <button id = "flip2card" type="button" class="btn btn-success" data-dismiss="modal" onclick="flip2card()">Xem 2 lá đối thủ</button>
+            <button id = "swap1card" type="button" class="btn btn-success" data-dismiss="modal" onclick="swap1card()" >2 bên đổi lá đầu</button>
+            
+            <button id = "change1card" type="button" class="btn btn-success" data-dismiss="modal" onclick="change1card()">Bạn đổi lá thứ 3</button>
+
+            <button id = "predict" type="button" class="btn btn-success" data-dismiss="modal" onclick="predict()" style="margin-top:10px">Dự đoán bài đối thủ</button>
+            
+            <button id = "thanbai1" type="button" class="btn btn-warning" data-dismiss="modal" onclick="thanbai1()" style="margin-top:10px;visibility:hidden">Thần bài 1</button>
+                               
+            <button id = "thanbai2" type="button" class="btn btn-warning" data-dismiss="modal" data-toggle="modal" onclick="thanbaishow()" style="margin-top:10px;visibility:hidden" data-target="#thanbaiModal">Thần bài 2</button>
+            
+            
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Modal3 -->
+    <div class="modal fade" id="upgradeModal" tabindex="-1" role="dialog" aria-labelledby="upgradeModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Nâng cấp</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            
+             <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">LV</th>
+                <th scope="col">Mô tả</th>
+                <th scope="col">Mở Khóa</th>
+              </tr>
+            </thead>
+            <tbody>
+               <tr>
+                <th scope="row">0</th>
+                <td>Thần bài 1 (2 ván được dùng 1 lần)</td>
+                <td><button type="button" class="btn btn-success" id = "upgrade6" onclick = "upgrade(this.id)" disabled>10000$</button></td>
+              </tr>
+              <tr>
+                <th scope="row">0</th>
+                <td>Thần bài 2 (3 ván được dùng 1 lần)</td>
+                <td><button type="button" class="btn btn-success" id = "upgrade7" onclick = "upgrade(this.id)" disabled>10000$</button></td>
+              </tr>
+              
+              <tr>
+                <th scope="row">2</th>
+                <td>Sau mỗi game +2000$</td>
+                <td><button type="button" class="btn btn-success" id = "upgrade1" onclick = "upgrade(this.id)" disabled>Locked</button><td>
+              </tr>
+              <tr>
+                <th scope="row">4</th>
+                <td>Thắng được x2 tiền cược</td>
+                <td><button type="button" class="btn btn-success" id = "upgrade2" onclick = "upgrade(this.id)" disabled>Locked</button></td>
+              </tr>
+              <tr>
+                <th scope="row">6</th>
+                <td>Thắng được x3 tiền cược</td>
+                <td><button type="button" class="btn btn-success" id = "upgrade3" onclick = "upgrade(this.id)" disabled>Locked</button></td>
+              </tr>
+              <tr>
+                <th scope="row">8</th>
+                <td>Thắng được x5 tiền cược</td>
+                <td><button type="button" class="btn btn-success" id = "upgrade4" onclick = "upgrade(this.id)" disabled>Locked</button></td>
+              </tr>
+              <tr>
+                <th scope="row">10</th>
+                <td>Thắng được x10 tiền cược</td>
+                <td><button type="button" class="btn btn-success" id = "upgrade5" onclick = "upgrade(this.id)" disabled>Locked</button></td>
+              </tr>
+              
+            </tbody>
+          </table>
+            
+            
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+ 
+           <!-- Modal4 -->
+          <div class="modal fade" id="levelupModal" tabindex="-1" role="dialog" aria-labelledby="levelupModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title">Chúc mừng bạn đã lên cấp</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body" id="modalContent">
+				
+                <div class="d-flex justify-content-center">
+                  <button id = "lucky" type="button" class="btn btn-success" onclick="trylucky()">Rút thăm may mắn</button>
+				</div>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+           <!-- Modal5 -->
+          <div class="modal fade" id="thanbaiModal" tabindex="-1" role="dialog" aria-labelledby="thanbaiModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title ">Chọn 2 lá và đổi</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body" id="modalContent">
+				
+                  <h5 class="d-flex justify-content-center" >Bài của bạn</h5>
+                  <div class="d-flex justify-content-center">
+                  	
+                    <div id = "num1" class="option" style="margin-left:10px">
+                    <span class="thCard " id="card4f" data-suit="♥" data-rank="1" onclick="thanbaiclick(this.id)" style="cursor:pointer;margin-left:5px"></span>
+                 	</div>
+                    
+                   	<div id = "num2" class="option" style="margin-left:10px">
+                    <span class="thCard" id="card5f" data-suit="♣" data-rank="1" onclick="thanbaiclick(this.id)" style="cursor:pointer;margin-left:5px"></span>
+                    </div>
+               
+                    <div id = "num3" class="option" style="margin-left:10px">
+                    <span class="thCard" id="card6f" data-suit="♣" data-rank="1" onclick="thanbaiclick(this.id)" style="cursor:pointer;margin-left:5px"></span>
+                    </div>
+                    
+                   </div>
+                   
+                   <hr style="height:2px;width:60%;text-align:left;margin-left:20%;color:gray;background-color:gray">
+                                     
+                   <div class="d-flex justify-content-center">
+                  	
+                    <div id = "num4" class="option2" style="margin-left:10px">
+                    <span class="thCard " id="subcard1" data-suit="♥" data-rank="1" onclick="thanbaiclick(this.id)" style="cursor:pointer;margin-left:5px"></span>
+                 	</div>
+                    
+                   	<div id = "num5" class="option2" style="margin-left:10px">
+                    <span class="thCard" id="subcard2" data-suit="♣" data-rank="1" onclick="thanbaiclick(this.id)" style="cursor:pointer;margin-left:5px"></span>
+                    </div>
+               
+                    <div  id = "num6" class="option2" style="margin-left:10px">
+                    <span class="thCard" id="subcard3" data-suit="♣" data-rank="1" onclick="thanbaiclick(this.id)" style="cursor:pointer;margin-left:5px"></span>
+                    </div>
+                    
+                   </div>
+                   
+                
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-success" data-dismiss="modal" onclick="thanbai2()">Xác nhận</button>
+                  
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+   
+   
+
+
+  </div>
+  
+<script>
+
+
+  const result = document.getElementById("result")
+  const pattens = ["♥", "♠", "♦", "♣"]
+  const ranks = ["1","2","3","4","5","6","7","8","9","10","J","Q","K"]
+  const bet = document.getElementById("number")
+  const modalContent = document.getElementById("modalContent")
+  
+   var c1 = document.getElementById('card1')
+   var c2 = document.getElementById('card2')
+   var c3 = document.getElementById('card3')
+   var c4 = document.getElementById('card4')
+   var c5 = document.getElementById('card5')
+   var c6 = document.getElementById('card6')
+  
+  var count_game = 1
+  var game_win = 0
+  var game_draw = 0
+  var game_lose = 0
+  
+  var level = 1
+  var process = 0
+  
+  const cards = []
+  const listnum = []
+  
+  var money = 2000
+  const displayMoney = document.getElementById("yourMoney")
+  let history = []
+  
+  var upgrade_value = 0
+  
+  var disadvan = [1,1,2,2,3,5,10,0]
+  var dis = 0
+  
+  var godofcard = [0,0]
+  
+  var sub_deck = []
+  checkBet()
+  
+  var check1 = 0
+  var check2 = 0
+  
+  for(var i = 0; i < 4; i++)
+  {
+  	for(var j = 0; j < 13; j++)
+    {
+    	card = {patten: pattens[i], rank: ranks[j]}
+        cards.push(card)
+    }
+  }
+  
+  for(var i = 0; i < 52; i++)
+  {
+  	listnum.push(i)
+  }
+  
+  document.getElementById("historyButton").addEventListener("click", syncHis)
+  
+  function syncHis () {
+    var clonehis = history.splice()
+    modalContent.innerHTML = history.join("")
+  }
+  
+  
+   document.getElementById("clearHis").addEventListener("click", clrHis)
+  
+  function clrHis () {
+  	history = []
+    modalContent.innerHTML = history
+  }
+ 
+  function checkBet()
+  {
+  	
+  	 if(document.getElementById('number').value == 0)
+     {
+     	document.getElementById('playButton').disabled = true
+     }
+     else(document.getElementById('playButton').disabled = false)
+  }
+  
+  function increaseValue() {
+    var value = parseInt(document.getElementById('number').value, 10);
+    value = isNaN(value) ? 0 : value;
+    value+=100;
+    document.getElementById('number').value = value;
+    checkBet()
+  }
+
+  function decreaseValue() {
+    var value = parseInt(document.getElementById('number').value, 10);
+    value = isNaN(value) ? 0 : value;
+    value < 100 ? value = 100 : '';
+    value-=100;
+    document.getElementById('number').value = value;
+    checkBet()
+  }
+  
+  function onInput()
+  {
+	document.getElementById('playButton').disabled = false
+  }
+  
+  function trylucky()
+  {
+  	lucky = ["+10000$","+50000$","x2 tiền đang có","x3 tiền đang có","x5 tiền đang có"]
+    var random = Math.floor(Math.random() * lucky.length);
+    if(random == 0) {
+      document.getElementById('lucky').innerHTML = lucky[random]
+      money = money + 10000 }
+    else if(random == 1) {
+      document.getElementById('lucky').innerHTML = lucky[random]
+      money = money + 50000}
+    else if(random == 2) {
+      document.getElementById('lucky').innerHTML = lucky[random]
+      money = money * 2}
+    else if(random == 3) {
+      document.getElementById('lucky').innerHTML = lucky[random]
+      money = money * 3}
+    else {
+      document.getElementById('lucky').innerHTML = lucky[random]
+      money = money * 5} 
+    
+    displayMoney.innerHTML = money + "$"
+    document.getElementById('lucky').disabled = true
+    
+  }
+  
+  
+  function gameWin(bet) {
+    result.innerHTML = "You have WON " + bet + "$"
+    
+    var temp = money
+    
+    money = money + parseInt(bet)
+    
+    if(upgrade_value == 1) {money += 1000}
+    else if(upgrade_value == 2) {money += 1000; money += parseInt(bet) 
+    result.innerHTML = "You have WON " + bet + "$" + "(x2)"}
+    else if(upgrade_value == 3) {money += 1000; money += parseInt(bet)*2
+    result.innerHTML = "You have WON " + bet + "$" + "(x3)"}
+    else if(upgrade_value == 4) {money += 1000; money += parseInt(bet)*4
+    result.innerHTML = "You have WON " + bet + "$" + "(x5)"}
+    else if(upgrade_value == 5) {money += 1000; money += parseInt(bet)*9
+    result.innerHTML = "You have WON " + bet + "$" + "(x10)"}
+    
+    displayMoney.innerHTML = money + "$"
+    history.push("Game:" + count_game +" Won " + (money-temp) + "$    " + tg + "<br>")
+    
+    process += 1
+    var percent = 20 * process
+    document.getElementById('lvbar').style.width = percent.toString() + "%"
+    
+    if(process==5)
+    {
+    	level += 1
+        if(level<10)
+        {
+          if(level==2){
+            document.getElementById('upgrade1').innerHTML = "Unlock"
+            document.getElementById('upgrade1').disabled = false}
+          else if(level==4){
+            document.getElementById('upgrade2').innerHTML = "Unlock"
+            document.getElementById('upgrade2').disabled = false}
+          else if(level==6){
+            document.getElementById('upgrade3').innerHTML = "Unlock"
+            document.getElementById('upgrade3').disabled = false}
+          else if(level==8){
+            document.getElementById('upgrade4').innerHTML = "Unlock"
+            document.getElementById('upgrade4').disabled = false}
+          
+          document.getElementById('lvbar').style.width = "0%"
+          document.getElementById('lv').innerHTML = "LV: " + level + " " + "<small>(Win 5 game to Level Up)</small></h5>"
+          process = 0
+        }
+        else {
+        	 document.getElementById('upgrade5').disabled = false
+        	 document.getElementById('lvbar').style.width = "100%"
+             document.getElementById('lv').innerHTML = "LV: MAX"
+        }
+        
+        document.getElementById('lucky').disabled = false
+        document.getElementById('lucky').innerHTML = "Rút thăm may mắn"
+        
+        $("#levelupModal").modal('show')
+        
+    }
+  }
+  
+  function gameLose(bet){
+  	var temp = money
+    money = money - parseInt(bet)
+  	if(dis == 0) {money = money/2}
+    else if(dis == 1) {money = money}
+    else {money = money - (dis-1)*bet}
+    
+    result.innerHTML = "You have LOST " + (temp - money) + "$"
+    
+    displayMoney.innerHTML = money + "$"
+    history.push("Game:" + count_game +" Lost " + (temp-money) + "$		" + tg + "<br>")
+  }
+  
+  function gameDraw() {
+    result.innerHTML = "DRAW"
+    displayMoney.innerHTML = money + "$"
+    history.push("Game:" + count_game +" Draw " + "0$		" + tg + "<br>")
+  
+  }
+  
+  function preupgrade()
+  {
+  	if(money > 9999){
+    	if(godofcard[0] == 0 && godofcard[1] == 0 )
+            {
+              document.getElementById('upgrade6').disabled = false
+              document.getElementById('upgrade7').disabled = false
+            }
+        else if(godofcard[0] == 0)
+        	{document.getElementById('upgrade6').disabled = false}
+        else if(godofcard[1] == 0)
+        	{document.getElementById('upgrade7').disabled = false}       
+    }
+  }
+  
+  function upgrade(id)
+  {
+  	
+    if(id=="upgrade1") {
+    	if(upgrade_value > 1) {upgrade_value = upgrade_value}
+        else{upgrade_value = 1}
+    	document.getElementById('upgrade1').disabled = true
+        document.getElementById('upgrade1').innerHTML = "Unlocked"
+    }
+    else if(id=="upgrade2") {
+        if(upgrade_value > 2) {upgrade_value = upgrade_value}
+        else{upgrade_value = 2}
+    	document.getElementById('upgrade2').disabled = true
+        document.getElementById('upgrade2').innerHTML = "Unlocked"
+    }
+    else if(id=="upgrade3") {
+      	if(upgrade_value > 3) {upgrade_value = upgrade_value}
+        else{upgrade_value = 3}
+    	document.getElementById('upgrade3').disabled = true
+        document.getElementById('upgrade3').innerHTML = "Unlocked"
+    }
+    else if(id=="upgrade4") {
+    	if(upgrade_value > 4) {upgrade_value = upgrade_value}
+        else{upgrade_value = 4}
+    	document.getElementById('upgrade4').disabled = true
+        document.getElementById('upgrade4').innerHTML = "Unlocked"
+    }
+    else if(id=="upgrade5") {
+    	if(upgrade_value > 5) {upgrade_value = upgrade_value}
+        else{upgrade_value = 5}
+    	document.getElementById('upgrade5').disabled = true
+        document.getElementById('upgrade5').innerHTML = "Unlocked"
+    }
+    
+    else if(id=="upgrade6") {
+    	document.getElementById('upgrade6').disabled = true
+        document.getElementById('thanbai1').style.visibility = "visible"
+        godofcard[0] = 1
+        money = money - 10000
+        displayMoney.innerHTML = money + "$"
+        if(money < 10000) {document.getElementById('upgrade7').disabled = true}
+        document.getElementById('upgrade6').innerHTML = "Unlocked"
+    }
+    
+    else if(id=="upgrade7") {
+    	document.getElementById('upgrade7').disabled = true
+        document.getElementById('thanbai2').style.visibility = "visible"
+        godofcard[1] = 1
+        money = money - 10000
+        displayMoney.innerHTML = money + "$"
+        if(money < 10000) {document.getElementById('upgrade6').disabled = true}
+        document.getElementById('upgrade7').innerHTML = "Unlocked"
+    }
+    
+    //result.innerHTML = upgrade_value
+  }
+  
+  function swap1card()
+  {
+  	
+    // data-value attribute thì chỉ có thể dùng get set, k gọi trực tiếp đc
+    // element.attr dùng cho attr thông thường chứ k cho addtribute tùy biến
+    // get/setAttr dùng cho những attr k hợp lệ mà mình tạo ra cho element  
+  	var c1 = document.getElementById('card1')
+    var c4 = document.getElementById('card4')
+    
+    var temp = [c1.getAttribute("data-suit"), c1.getAttribute("data-rank")]
+    
+    c1.setAttribute("data-suit", c4.getAttribute("data-suit"))
+    c1.setAttribute("data-rank", c4.getAttribute("data-rank"))
+    
+    c4.setAttribute("data-suit", temp[0])
+    c4.setAttribute("data-rank", temp[1])
+    
+    $("#buffModal").modal('hide')
+    document.getElementById('swap1card').disabled = true
+    
+  }
+  
+  function flip2card()
+  {
+  	var c1 = document.getElementById('card1')
+    var c2 = document.getElementById('card2')
+    
+    c1.classList.remove("turn")
+    c2.classList.remove("turn")
+    
+    $("#buffModal").modal('hide')
+    document.getElementById('flip2card').disabled = true
+    
+  }
+  
+  function change1card()
+  {
+  	var c6 = document.getElementById('card6')
+	
+    c6.setAttribute("data-suit", cards[sub_deck[0]].patten)
+    c6.setAttribute("data-rank", cards[sub_deck[0]].rank)
+    
+    $("#buffModal").modal('hide')
+    document.getElementById('change1card').disabled = true
+  }
+ 
+  function predict()
+  {
+  	var c1 = document.getElementById('card1')
+    var c2 = document.getElementById('card2')
+    var c3 = document.getElementById('card3')
+	
+    var l = [c1.getAttribute("data-rank"),
+    c2.getAttribute("data-rank"),
+    c3.getAttribute("data-rank")]
+    
+    var dudoan = 0
+    var batay = 0
+    for(var i = 0; i < 3; i++ )
+    {	
+      if(["J","K","Q"].includes(l[i]))
+      {
+		 dudoan += 10
+         batay += 1
+      }
+      else {dudoan += parseInt(l[i]) }        
+    }
+    
+    if(batay == 3) {result.innerHTML = "Bài đối thủ lớn hơn 5"}
+    else {
+    	if(dudoan % 10 > 5) {result.innerHTML = "Bài đối thủ lớn hơn 5"}
+        else {result.innerHTML = "Bài đối thủ bé hơn hoặc bằng 5"}
+    }
+    
+    
+    
+    $("#buffModal").modal('hide')
+    document.getElementById('predict').disabled = true
+  }
+ 
+ 
+  function thanbai1()
+  {	
+  	check1 = 1
+  	var c4 = document.getElementById('card4')
+    var c5 = document.getElementById('card5')
+    var c6 = document.getElementById('card6')
+	
+    var l = [c4.getAttribute("data-rank"),
+    c5.getAttribute("data-rank"),
+    c6.getAttribute("data-rank")]
+    
+    var dudoan = 0
+    var batay = 0
+    for(var i = 0; i < 2; i++ )
+    {	
+      if(["J","K","Q"].includes(l[i]))
+      {
+		 dudoan += 10
+         batay += 1
+      }
+      else {dudoan += parseInt(l[i]) }        
+    }
+    
+    var max = 0
+    var index = 0
+    //var arr = []
+    //var arr2 = []
+    
+    for(var i = 4; i < 10; i++)
+    {	
+    	kq = dudoan
+    	var t = 0
+    	if(["J","K","Q"].includes(cards[sub_deck[i]].rank))
+        {
+           kq += 10
+           if(batay == 2) {index = i; break}
+        }
+      	else {kq += parseInt(cards[sub_deck[i]].rank) }
+        
+        if(kq%10 > max) {max = kq%10; index = i }
+        
+        //arr.push(kq%10)
+        //arr2.push(cards[sub_deck[i]].rank)
+    }
+    
+    c6.setAttribute("data-suit", cards[sub_deck[index]].patten)
+    c6.setAttribute("data-rank", cards[sub_deck[index]].rank)
+    
+    $("#buffModal").modal('hide')
+    document.getElementById('thanbai1').disabled = true
+  }
+  
+  
+  function thanbaishow()
+  {
+    
+  	var c4 = document.getElementById('card4')
+    var c5 = document.getElementById('card5')
+    var c6 = document.getElementById('card6')
+    
+  	var c4f = document.getElementById("card4f")
+    var c5f = document.getElementById("card5f")
+    var c6f = document.getElementById("card6f")
+    
+    var sc1 = document.getElementById("subcard1")
+    var sc2 = document.getElementById("subcard2")
+    var sc3 = document.getElementById("subcard3")
+    
+    //result.innerHTML = c4f
+    
+    c4f.setAttribute("data-suit", c4.getAttribute("data-suit"))
+    c4f.setAttribute("data-rank", c4.getAttribute("data-rank"))
+   
+    c5f.setAttribute("data-suit", c5.getAttribute("data-suit"))
+    c5f.setAttribute("data-rank", c5.getAttribute("data-rank"))
+    
+    c6f.setAttribute("data-suit", c6.getAttribute("data-suit"))
+    c6f.setAttribute("data-rank", c6.getAttribute("data-rank"))
+    
+    ///
+    
+    sc1.setAttribute("data-suit", cards[sub_deck[1]].patten)
+    sc1.setAttribute("data-rank", cards[sub_deck[1]].rank)
+   
+    sc2.setAttribute("data-suit", cards[sub_deck[2]].patten)
+    sc2.setAttribute("data-rank", cards[sub_deck[2]].rank)
+    
+    sc3.setAttribute("data-suit", cards[sub_deck[2]].patten)
+    sc3.setAttribute("data-rank", cards[sub_deck[3]].rank)
+  }
+  
+  function thanbaiclick(card)
+  {
+    var x = document.getElementsByClassName('option')
+    for (var i = 0; i < x.length; i++) {
+      	x[i].addEventListener("click", function() {
+          var selectedEl = document.querySelector(".selected");
+          if (selectedEl) {
+            selectedEl.classList.remove("selected");
+          	}
+        this.classList.add("selected")
+      }, false);
+    }
+
+    var y = document.getElementsByClassName('option2')
+    for (var i = 0; i < y.length; i++) {
+      	y[i].addEventListener("click", function() {
+          var selectedEl = document.querySelector(".selected2");
+          if (selectedEl) {
+            selectedEl.classList.remove("selected2");
+          	}
+        this.classList.add("selected2")
+
+      }, false);
+    }
+    
+  	//document.getElementById(card).style.border = "3px solid #00ff00"
+  	//result.innerHTML = $("div.option.selected").attr('id') + $("div.option2.selected2").attr('id')
+  }
+  
+  function thanbai2()
+  {	
+  	 check2 = 3
+  	 var l1 = ["num1","num2","num3","num4","num5","num6"]
+     var l2 = ["card4","card5","card6",1,2,3]
+     
+  	 var a = $("div.option.selected").attr('id')
+     var b = $("div.option2.selected2").attr('id')
+     
+     var c = l1.indexOf(a)
+     var d = l1.indexOf(b)
+     
+     var cardnew = document.getElementById(l2[c])
+     
+     var sub = [cards[sub_deck[l2[d]]].patten, cards[sub_deck[l2[d]]].rank]
+     
+     cardnew.setAttribute("data-suit", sub[0])
+     cardnew.setAttribute("data-rank", sub[1])
+     
+     //result.innerHTML = "Đã kích hoạt thần bài"
+     document.getElementById('thanbai2').disabled = true
+  }
+  
+  
+  
+  
+  function play() {
+    
+     document.getElementById('buff').disabled = false
+     
+    	
+     if(document.getElementById('number').value > 5000)
+     {
+     	document.getElementById('number').value = 5000
+     }
+     if(document.getElementById('number').value == "")
+     {document.getElementById('number').value = 100}
+     
+     if(check1 == 1) {
+     	check1 = 0
+        document.getElementById('thanbai1').disabled = true}
+        
+     if(check2 != 0) {
+     	check2 -= 1 
+        document.getElementById('thanbai2').disabled = true}
+   
+     	
+  
+    document.getElementById('number').disabled = true
+    document.getElementById('increase').onclick = "#"
+    document.getElementById('decrease').onclick = "#"
+    
+	var rand = Math.floor(Math.random() * disadvan.length);
+	dis = disadvan[rand] 
+    if(disadvan[rand] == 0) {
+    document.getElementById('disadvantage').innerHTML = "Bất lợi: <br> Thua chia đôi tiền"}
+    else if(disadvan[rand] == 1) {document.getElementById('disadvantage').innerHTML = "Bất lợi: <br> Không có"}
+    else if(disadvan[rand] > 1) {
+    document.getElementById('disadvantage').innerHTML = "Bất lợi: <br> Thua x" + disadvan[rand]
+    }
+     
+  	var randomcard = []
+    var listnum2 = listnum.slice()
+    
+    result.innerHTML = "Click 'Go' to see result" 
+    
+    // xào bài
+    listnum2.sort(function(a, b){return 0.5 - Math.random()});
+    
+    var log = []
+    
+    for(var i = 0; i < 20; i++)
+    { 	
+    	//num = Math.floor(Math.random() * listnum2.length)
+        //listnum2.splice(listnum2.indexOf(num), 1)
+    	randomcard.push(listnum2[i])
+        if(i>5) {sub_deck.push(listnum2[i])} 
+    }
+    
+    c1.classList.add("turn")
+    c2.classList.add("turn")
+    c3.classList.add("turn")
+    
+    c1.setAttribute("data-suit", cards[randomcard[0]].patten)
+    c1.setAttribute("data-rank", cards[randomcard[0]].rank)
+    
+    c2.setAttribute("data-suit", cards[randomcard[1]].patten)
+    c2.setAttribute("data-rank", cards[randomcard[1]].rank)
+    
+    c3.setAttribute("data-suit", cards[randomcard[2]].patten)
+    c3.setAttribute("data-rank", cards[randomcard[2]].rank)
+    
+    c4.classList.remove("turn")
+    c4.setAttribute("data-suit", cards[randomcard[3]].patten)
+    c4.setAttribute("data-rank", cards[randomcard[3]].rank)
+    
+    c5.classList.remove("turn")
+    c5.setAttribute("data-suit", cards[randomcard[4]].patten)
+    c5.setAttribute("data-rank", cards[randomcard[4]].rank)
+    
+    c6.classList.remove("turn")
+    c6.setAttribute("data-suit", cards[randomcard[5]].patten)
+    c6.setAttribute("data-rank", cards[randomcard[5]].rank)
+    
+    
+    document.getElementById('showButton').disabled = false
+    document.getElementById('playButton').disabled = true
+    
+    // show model
+    //$("#exampleModal").modal('show')
+  }
+  
+  function show()
+  {
+  
+  	document.getElementById('number').disabled = false
+    document.getElementById('increase').setAttribute("onclick", "increaseValue()")
+    document.getElementById('decrease').setAttribute("onclick", "decreaseValue()")
+    
+    document.getElementById('buff').disabled = true
+    
+    document.getElementById('swap1card').disabled = false
+    document.getElementById('flip2card').disabled = false
+    document.getElementById('change1card').disabled = false
+    document.getElementById('predict').disabled = false
+    document.getElementById('thanbai1').disabled = false
+    document.getElementById('thanbai2').disabled = false
+    
+    listcardvalue = []
+    
+    var bet = document.getElementById('number').value
+    
+    listcardvalue.push(c1.getAttribute("data-rank"))
+    listcardvalue.push(c2.getAttribute("data-rank"))
+    listcardvalue.push(c3.getAttribute("data-rank"))
+    listcardvalue.push(c4.getAttribute("data-rank"))
+    listcardvalue.push(c5.getAttribute("data-rank"))
+    listcardvalue.push(c6.getAttribute("data-rank"))
+
+    //result.innerHTML = listcardvalue
+    
+    var yourpoint = 0
+    var enemypoint = 0
+    
+    var e_count = 0
+    var y_count = 0
+    
+    for(var i = 0; i < 6; i++ )
+    {
+    	if(i < 3)
+        {
+        	
+        	if(["J","K","Q"].includes(listcardvalue[i]))
+            {
+            	enemypoint += 10
+                e_count += 1 
+            }
+            else {enemypoint += parseInt(listcardvalue[i]) }         
+        }
+        else
+        {	
+       		
+        	if(["J","K","Q"].includes(listcardvalue[i]))
+            {
+            	yourpoint += 10
+                y_count += 1
+            }
+            else {yourpoint += parseInt(listcardvalue[i]) }
+        }
+    }
+    
+    //result.innerHTML = enemypoint + " " + yourpoint
+    
+    var dt = new Date();
+    dt = dt.toString();
+    time = dt.split(" ")
+    tg = time[4] + " " + time[2] + "-" + time[1] + "-" + time[3]
+
+
+
+    if(y_count == 3 || e_count == 3 ){
+
+      if(y_count == e_count){
+        gameDraw()
+        game_draw += 1
+      }
+      else if(y_count == 3) { gameWin(bet); game_win += 1 }
+      else if(e_count == 3) { gameLose(bet); game_lose += 1 } 
+    }
+    else{
+      yourpoint = yourpoint % 10
+      enemypoint = enemypoint % 10
+
+      if(yourpoint > enemypoint)
+      {	
+        gameWin(bet)
+        game_win += 1
+      }
+      else if(yourpoint < enemypoint){ 
+        gameLose(bet)
+        game_lose += 1
+      }
+      else {gameDraw()
+      		game_draw += 1}
+    }
+	
+    c1.classList.remove("turn")
+    c2.classList.remove("turn")
+    c3.classList.remove("turn")
+    
+    document.getElementById('showButton').disabled = true
+    document.getElementById('playButton').disabled = false
+    
+    count_game += 1
+    document.getElementById("countGame").innerHTML = "Game: " + count_game
+    sub_deck = []
+    
+	if(money > 999999) {
+       //result.innerHTML = "Congratulation, You have pass 1 million dolars"
+       $("#congraModal").modal('show')
+       document.getElementById('total').innerHTML = "Win: " + game_win + "<br>" 
+       											+"Lose: "+ game_lose + "<br>" 
+                                                +"Draw: "+ game_draw + "<br>" 
+       }
+
+        
+  }
+  
+  
+</script>
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+</body>
+
+</html>
+
